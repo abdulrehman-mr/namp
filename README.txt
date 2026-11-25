@@ -68,3 +68,19 @@ UNINSTALL
   Windows Settings -> Apps -> NAMP. The services, the HTTPS certificate and the
   hosts entries are removed; your websites, databases and backups in C:\NAMP
   are kept.
+
+THIRD-PARTY SOFTWARE
+  NAMP bundles software from these projects. Their license files remain in the
+  installed component folders and continue to govern those components:
+
+  - Apache HTTP Server 2.4.71 — Apache License 2.0
+    Source: https://httpd.apache.org/download.cgi
+  - PHP 8.5.13 and 8.3.37 — PHP License
+    Source: https://www.php.net/downloads.php
+  - MariaDB 11.8.10 LTS — GNU GPL v2
+    Source: https://github.com/MariaDB/server
+  - phpMyAdmin 5.2.3 — GNU GPL v2
+    Source: https://www.phpmyadmin.net/downloads/
+
+PROJECT
+  Source code and releases: https://github.com/abdulrehman-mr/namp
