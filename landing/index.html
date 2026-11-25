@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NAMP · Free local web server for Windows · by Lvato</title>
+<meta name="description" content="NAMP is a free local web server for Windows: Apache, PHP 8.5, MariaDB and phpMyAdmin in one installer. Local .local domains with HTTPS, and a database that survives power cuts.">
+<meta property="og:title" content="NAMP · Free local web server for Windows">
+<meta property="og:description" content="Apache, PHP 8.5, MariaDB and phpMyAdmin in one installer. Real .local domains with HTTPS. A database that survives power cuts.">
+<meta property="og:image" content="assets/namp-overview.png">
+<link rel="icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F7F5; --ink: #141413; --muted: #6A6A65; --faint: #9A9A94; --line: #E3E3DF; --card: #EEEEEA; --white: #FFFFFF;
+    --accent: #FFA06B; --accent-ink: #1A0E07; --accent-strong: #EA580C; --soft: #E6E6E2;
+    --mat: #4B4B48; --mat-line: rgba(255, 255, 255, .13); --blue: #0A74E6;
+    --sans: "Geist", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mono: "Geist Mono", "Cascadia Code", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  img { display: block; max-width: 100%; }
+  .wrap { width: min(1200px, 100% - 48px); margin: 0 auto; }
+  img.shot { height: auto; }
+  body { overflow-x: hidden; }
+
+  /* ---------- buttons & pills ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px; padding: 11px 20px; border-radius: 999px; border: 0;
+    font: 500 13.5px/1 var(--mono); text-transform: uppercase; letter-spacing: .03em; text-decoration: none; cursor: pointer;
+    background: var(--soft); color: var(--ink); transition: transform .15s, background .15s;
+  }
+  .btn:hover { transform: translateY(-1px); background: #DDDDD8; }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); }
+  .btn.primary:hover { background: #FF8F52; }
+  .btn svg { width: 15px; height: 15px; }
+  .tag {
+    display: inline-block; font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+    border: 1px solid #CFCFCA; border-radius: 999px; padding: 5px 10px;
+  }
+
+  /* ---------- header ---------- */
+  header { position: sticky; top: 0; z-index: 10; background: rgba(247, 247, 245, .86); backdrop-filter: blur(10px); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 600; font-size: 19px; }
+  .brand img { width: 30px; height: 30px; }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  .nav-link { font: 500 13px var(--mono); text-transform: uppercase; letter-spacing: .03em; text-decoration: none; padding: 10px 14px; }
+  .nav-link:hover { color: var(--accent-strong); }
+
+  /* ---------- dotted heading backdrop ---------- */
+  .dots { position: relative; text-align: center; padding: 46px 0; }
+  .dots::before {
+    content: ""; position: absolute; inset: 0 max(0px, calc(50% - 330px)); z-index: -1;
+    background-image: radial-gradient(#C8C8C2 1.1px, transparent 1.2px); background-size: 15px 15px;
+    -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent); mask-image: radial-gradient(closest-side, #000 55%, transparent);
+  }
+  h1, h2, h3 { font-weight: 500; letter-spacing: -.025em; margin: 0; }
+  h2 { font-size: clamp(34px, 4.4vw, 50px); line-height: 1.08; }
+  .sub { color: var(--muted); margin: 12px auto 0; max-width: 60ch; }
+  section { padding: 64px 0; }
+
+  /* ---------- hero ---------- */
+  .hero { position: relative; text-align: center; padding: 40px 0 0; }
+  .hero > .wrap { position: relative; z-index: 2; }
+
+  /* floating stack logos around the hero title */
+  .float-logos { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .fl {
+    position: absolute; width: 78px; height: 78px; border-radius: 22px; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(160deg, #FFFFFF, #F4F4F1); border: 1px solid #E2E2DD;
+    box-shadow: 0 18px 40px -12px rgba(20, 20, 19, .22), inset 0 1px 0 #fff;
+    transform: rotate(var(--r)); animation: bob var(--d, 6.5s) ease-in-out infinite; pointer-events: auto; transition: border-color .2s;
+  }
+  .fl::before { content: ""; position: absolute; inset: 16px; border-radius: 50%; background: var(--c); filter: blur(20px); opacity: .22; }
+  .fl:hover { border-color: var(--accent); }
+  .fl img { position: relative; width: 40px; height: 40px; object-fit: contain; }
+  .fl:nth-child(even) { animation-delay: -2.4s; }
+  .fl:nth-child(3n) { animation-delay: -4.1s; }
+  @keyframes bob { 0%, 100% { transform: translateY(0) rotate(var(--r)); } 50% { transform: translateY(-14px) rotate(var(--r)); } }
+  @media (prefers-reduced-motion: reduce) { .fl { animation: none; } }
+  @media (max-width: 1120px) { .float-logos { display: none; } }
+
+  /* GitHub pill with live star count */
+  .btn.gh .sep, .btn.gh .stars { display: none; }
+  .btn.gh.has-stars .sep { display: inline-block; width: 1px; height: 14px; background: #BDBDB7; }
+  .btn.gh.has-stars .stars { display: inline; }
+  .hero .dots { padding: 34px 0 30px; }
+  .hero h1 { font-size: clamp(56px, 8vw, 96px); line-height: .98; letter-spacing: -.045em; }
+  .hero h1 .dot { display: inline-block; width: .17em; height: .17em; border-radius: 50%; background: var(--accent-strong); margin-left: .05em; }
+  .hero .lead { font-size: 21px; line-height: 1.45; max-width: 640px; margin: 22px auto 30px; }
+  .cta { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .fine { margin-top: 18px; font-size: 13.5px; color: var(--muted); }
+  .fine a { text-underline-offset: 3px; }
+
+  /* ---------- collage frame (paper on a cutting mat) ---------- */
+  .mat {
+    position: relative; overflow: hidden; border-radius: 22px; background-color: var(--mat);
+    background-image: linear-gradient(var(--mat-line) 1px, transparent 1px), linear-gradient(90deg, var(--mat-line) 1px, transparent 1px);
+    background-size: 46px 46px;
+  }
+  .mat.light { background-color: #CFCBC4; --mat-line: rgba(255, 255, 255, .35); }
+  .paper {
+    position: absolute; background: #F4F1EA; box-shadow: 0 2px 6px rgba(0, 0, 0, .18), 0 18px 40px -20px rgba(0, 0, 0, .35);
+    background-image: linear-gradient(rgba(70, 120, 190, .12) 1px, transparent 1px), linear-gradient(90deg, rgba(70, 120, 190, .12) 1px, transparent 1px);
+    background-size: 14px 14px;
+    clip-path: polygon(0 1%, 7% 0, 15% 1.2%, 26% 0.3%, 38% 1.1%, 51% 0, 63% 1%, 74% 0.2%, 86% 1.3%, 100% 0, 99.4% 22%, 100% 47%, 99.2% 73%, 100% 100%, 84% 99.1%, 69% 100%, 52% 99.2%, 36% 100%, 21% 99.3%, 9% 100%, 0 99%, .7% 74%, 0 50%, .8% 24%);
+  }
+  .paper.plain { background-image: none; background-color: #ECE9E1; }
+  .paper.peach { background-image: none; background-color: #FFD8BF; }
+  .sticker { position: absolute; border-radius: 50%; background: var(--accent-strong); opacity: .9; }
+  .shot { position: relative; z-index: 2; border-radius: 12px; box-shadow: 0 0 0 1px rgba(0, 0, 0, .08), 0 30px 70px -20px rgba(0, 0, 0, .55); }
+
+  .hero-media { margin-top: 56px; padding: 7% 8% 0; }
+  .hero-media .shot { border-radius: 12px 12px 0 0; margin: 0 auto; }
+
+  /* ---------- proof cards ---------- */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 8px; }
+  .stat { background: var(--card); border-radius: 18px; padding: 26px 24px 28px; }
+  .stat b { display: block; font-weight: 400; font-size: 40px; letter-spacing: -.03em; line-height: 1.1; }
+  .stat span { display: block; margin-top: 6px; font-size: 15px; }
+  .stat small { display: block; margin-top: 10px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+  .center-link { text-align: center; margin-top: 24px; font-size: 14px; color: var(--muted); }
+  .center-link a { text-underline-offset: 3px; }
+
+  /* ---------- feature rows ---------- */
+  .features { border: 1px solid var(--line); border-radius: 26px; background: #FAFAF8; }
+  .row { display: grid; grid-template-columns: 1.55fr 1fr; gap: 40px; align-items: start; padding: 32px; }
+  .row + .row { border-top: 1px solid var(--line); }
+  .row .mat { aspect-ratio: 16 / 10.5; }
+  .row .mat .shot { position: absolute; width: 82%; left: 9%; top: 12%; }
+  .row h3 { font-size: 28px; line-height: 1.15; margin-top: 6px; }
+  .row p { color: #3B3B38; margin: 16px 0 0; }
+  .row code, .faq code { font: 14px var(--mono); background: var(--card); padding: 1px 6px; border-radius: 5px; }
+
+  .stack-card {
+    position: absolute; z-index: 2; left: 12%; right: 12%; top: 13%; background: #FBFBF9; border-radius: 16px; padding: 22px 24px;
+    box-shadow: 0 30px 70px -20px rgba(0, 0, 0, .55);
+  }
+  .stack-card h4 { margin: 0 0 14px; font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .stack-card ul { list-style: none; margin: 0; padding: 0; }
+  .stack-card li { display: flex; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
+  .stack-card li span { font: 13.5px var(--mono); color: var(--muted); }
+
+  /* ---------- 4-up icon list ---------- */
+  .quad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+  .quad h4 { display: flex; align-items: center; gap: 9px; margin: 0 0 8px; font-size: 16px; font-weight: 500; }
+  .quad svg { width: 18px; height: 18px; flex: none; }
+  .quad p { margin: 0; color: #3B3B38; font-size: 15px; }
+
+  /* ---------- paper cards rail ---------- */
+  .rail { display: flex; gap: 18px; overflow-x: auto; padding: 8px 24px 26px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .rail::-webkit-scrollbar { display: none; }
+  /* centered when the cards fit, still scrollable (without clipping) when they don't */
+  .rail > :first-child { margin-left: auto; }
+  .rail > :last-child { margin-right: auto; }
+  .note {
+    flex: none; width: 280px; height: 340px; padding: 22px; scroll-snap-align: center; display: flex; flex-direction: column;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .08), 0 12px 30px -18px rgba(0, 0, 0, .35); transition: transform .2s;
+  }
+  .note:hover { transform: rotate(-1deg) translateY(-4px); }
+  .note .k { font: 500 12.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+  .note h4 { margin: 12px 0 8px; font-size: 21px; font-weight: 500; line-height: 1.2; letter-spacing: -.01em; }
+  .note p { margin: 0; font-size: 14.5px; color: #3B3B38; }
+  .note.lined { background: #F3F3F1 repeating-linear-gradient(#F3F3F1 0 27px, #A9C9EE 27px 28px); }
+  .note.pink { background: #FFE3D6; border: 1px solid #F3A27E; justify-content: flex-end; }
+  .note.grid { background-color: #CFCBC4; background-image: linear-gradient(rgba(0,0,0,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.09) 1px, transparent 1px); background-size: 13px 13px; }
+  .note.table { background: #EFEFEC linear-gradient(90deg, transparent 0 calc(25% - 1px), #D5D5D0 calc(25% - 1px) 25%, transparent 25%) 0 0 / 120px 100%; justify-content: flex-end; }
+  .note.dotted { background: #EEF2FF radial-gradient(#9FB2E8 1px, transparent 1.3px) 0 0 / 16px 16px; }
+
+  /* ---------- go live (Lvato) ---------- */
+  .live { max-width: 620px; margin: 0 auto; }
+  .live ol { list-style: none; margin: 34px 0 0; padding: 0; }
+  .live li { position: relative; display: flex; gap: 18px; padding-bottom: 26px; font-size: 17px; }
+  .live li:not(:last-child)::before { content: ""; position: absolute; left: 17px; top: 36px; bottom: 0; border-left: 1px dashed #C9C9C3; }
+  .live .ico { flex: none; width: 35px; height: 35px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; }
+  .live .ico svg { width: 16px; height: 16px; }
+  .live b { font-weight: 600; }
+  .live li div { padding-top: 5px; }
+  .live .cta { justify-content: flex-start; margin-top: 8px; padding-left: 53px; }
+
+  /* ---------- FAQ ---------- */
+  .faq { max-width: 760px; margin: 10px auto 0; }
+  details { border-top: 1px solid var(--line); padding: 20px 4px; }
+  details:last-child { border-bottom: 1px solid var(--line); }
+  summary { cursor: pointer; list-style: none; font-size: 19px; font-weight: 500; display: flex; justify-content: space-between; gap: 20px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; font: 400 24px/1 var(--mono); color: var(--muted); transition: transform .2s; }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p { margin: 14px 0 2px; color: #3B3B38; }
+
+  /* ---------- final CTA + footer ---------- */
+  .final { text-align: center; padding: 80px 0 90px; }
+  .final .hash { margin-top: 16px; font: 12px var(--mono); color: var(--faint); word-break: break-all; }
+  footer { border-top: 1px solid var(--line); padding: 34px 0 44px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+  footer nav { display: flex; gap: 22px; }
+  footer a { text-decoration: none; }
+  footer a:hover { color: var(--ink); }
+
+  @media (max-width: 920px) {
+    .stats, .quad { grid-template-columns: 1fr 1fr; }
+    .row { grid-template-columns: 1fr; padding: 20px; gap: 22px; }
+    .nav-link.hide-sm { display: none; }
+  }
+  @media (max-width: 640px) {
+    .brand .tag, .nav-right .btn:not(.primary) { display: none; }
+  }
+  @media (max-width: 560px) {
+    .stats, .quad { grid-template-columns: 1fr; }
+    .hero .lead br { display: none; }
+    .btn { font-size: 12.5px; padding: 11px 16px; }
+    .hero .lead { font-size: 18px; }
+    .hero-media { padding: 9% 4% 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#"><img src="assets/namp-logo.png" alt="">NAMP <span class="tag">by Lvato</span></a>
+    <div class="nav-right">
+      <a class="nav-link hide-sm" href="#features">Features</a>
+      <a class="nav-link hide-sm" href="#faq">FAQ</a>
+      <!-- Set your repository URL here; the star count loads automatically. -->
+      <a class="btn gh" data-github href="https://github.com/YOUR-ORG/namp" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub<span class="sep"></span><span class="stars"></span>
+      </a>
+      <a class="btn primary" href="downloads/NAMP-Setup-1.0.0.exe">Download</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ======================= HERO ======================= -->
+  <section class="hero">
+    <div class="float-logos" aria-hidden="true">
+      <span class="fl" title="PHP" style="top:26px; left:max(12px, calc(50% - 520px)); --r:-8deg; --c:#777BB4; --d:6.2s"><img src="assets/logos/php.svg" alt=""></span>
+      <span class="fl" title="WordPress" style="top:190px; left:max(12px, calc(50% - 640px)); --r:7deg; --c:#21759B; --d:7.4s"><img src="assets/logos/wordpress.svg" alt=""></span>
+      <span class="fl" title="Laravel" style="top:350px; left:max(12px, calc(50% - 520px)); --r:-5deg; --c:#FF2D20; --d:6.8s"><img src="assets/logos/laravel.svg" alt=""></span>
+      <span class="fl" title="MariaDB" style="top:26px; right:max(12px, calc(50% - 520px)); --r:8deg; --c:#003545; --d:6.6s"><img src="assets/logos/mariadb.svg" alt=""></span>
+      <span class="fl" title="Apache" style="top:190px; right:max(12px, calc(50% - 640px)); --r:-7deg; --c:#D22128; --d:7.8s"><img src="assets/logos/apache.svg" alt=""></span>
+      <span class="fl" title="phpMyAdmin" style="top:350px; right:max(12px, calc(50% - 520px)); --r:5deg; --c:#F89C0E; --d:6.4s"><img src="assets/logos/phpmyadmin.svg" alt=""></span>
+    </div>
+    <div class="wrap">
+      <span class="tag">Free · Windows 11</span>
+      <div class="dots"><h1>Meet NAMP<span class="dot"></span></h1></div>
+      <p class="lead">Apache, PHP 8.5, MariaDB and phpMyAdmin in one installer. Real <b>.local</b> domains with HTTPS, and a database that survives power cuts.</p>
+      <div class="cta">
+        <a class="btn primary" href="downloads/NAMP-Setup-1.0.0.exe">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 2.3 6.5 1.4v6.2H0zM7.3 1.3 16 0v7.6H7.3zM0 8.4h6.5v6.2L0 13.7zm7.3 0H16V16l-8.7-1.2z"/></svg>
+          Download for Windows
+        </a>
+        <a class="btn" href="#features">See what's inside</a>
+      </div>
+      <p class="fine">Free · 110 MB · Windows 11 64-bit · <a href="#faq">Coming from XAMPP?</a></p>
+
+      <div class="mat hero-media">
+        <div class="paper" style="left:3%; top:5%; width:52%; height:90%; transform:rotate(-2deg)"></div>
+        <div class="paper plain" style="right:2%; top:9%; width:55%; height:84%; transform:rotate(1.6deg)"></div>
+        <div class="paper peach" style="left:34%; bottom:-8%; width:36%; height:40%; transform:rotate(-4deg)"></div>
+        <img class="shot" src="assets/namp-overview.png" alt="NAMP control panel: web server and database running, quick actions and activity feed" width="1221" height="831">
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= PROOF ======================= -->
+  <section id="proof">
+    <div class="wrap">
+      <div class="dots">
+        <h2>Pull the plug. Keep your data.</h2>
+        <p class="sub">We crash the database on purpose in every build. Here is what our test suite measures.</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>0 of 8,750</b><span>committed rows lost</span><small>Database killed mid-write with three busy writers, then restarted.</small></div>
+        <div class="stat"><b>3 of 3</b><span>damage cases repaired</span><small>Corrupted Aria log, destroyed redo log, safe-mode rebuild - no clicks needed.</small></div>
+        <div class="stat"><b>42</b><span>end-to-end checks</span><small>Web, PHP, HTTPS, phpMyAdmin, backups and recovery on every build.</small></div>
+        <div class="stat"><b>0</b><span>admin prompts after install</span><small>A small helper service handles hosts and certificates for you.</small></div>
+      </div>
+      <p class="center-link"><a href="#power">How NAMP protects your data</a></p>
+    </div>
+  </section>
+
+  <!-- ======================= FEATURES ======================= -->
+  <section id="features">
+    <div class="wrap">
+      <div class="dots">
+        <h2>Local, but like production</h2>
+        <p class="sub">Everything a PHP project expects, without the setup afternoon.</p>
+      </div>
+      <div class="features">
+        <div class="row">
+          <div class="mat light">
+            <div class="paper" style="left:-4%; top:6%; width:62%; height:92%; transform:rotate(-3deg)"></div>
+            <div class="paper peach" style="right:-6%; top:-6%; width:46%; height:60%; transform:rotate(5deg)"></div>
+            <div class="sticker" style="width:78px; height:78px; right:7%; bottom:8%"></div>
+            <img class="shot" src="assets/namp-sites.png" alt="NAMP Sites page with shop.local, blog.test and client-portal.local over HTTPS" loading="lazy">
+          </div>
+          <div>
+            <h3>Every project gets a real domain</h3>
+            <p>Type <code>myshop</code> and open <code>https://myshop.local</code>. NAMP updates the hosts file and issues a certificate your browser trusts, so HTTPS redirects and secure cookies work exactly like on your live server.</p>
+            <p>Each site has its own error, visit and PHP logs, one click away.</p>
+          </div>
+        </div>
+
+        <div class="row" id="power">
+          <div class="mat">
+            <div class="paper plain" style="left:5%; top:-5%; width:60%; height:76%; transform:rotate(2deg)"></div>
+            <div class="paper" style="right:-3%; bottom:-6%; width:58%; height:72%; transform:rotate(-2.5deg)"></div>
+            <div class="sticker" style="width:56px; height:56px; left:6%; bottom:10%"></div>
+            <img class="shot" src="assets/namp-databases.png" alt="NAMP Databases page with backups and data protection status" loading="lazy">
+          </div>
+          <div>
+            <h3>Power cut? Your database is fine.</h3>
+            <p>Every commit is written to disk before it is confirmed. MariaDB runs as a Windows service, so it stops cleanly when you shut down - even if NAMP was closed.</p>
+            <p>If something does break, NAMP repairs it on the next start, keeps a last-good copy and backs up every database each hour. Damaged files are set aside, never deleted.</p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="mat light">
+            <div class="paper" style="left:-3%; top:8%; width:58%; height:96%; transform:rotate(-2deg)"></div>
+            <div class="paper peach" style="right:-4%; top:-10%; width:44%; height:52%; transform:rotate(4deg)"></div>
+            <img class="shot" src="assets/namp-settings.png" alt="NAMP settings: PHP 8.5 or 8.3, ports, HTTPS and backup options" loading="lazy">
+          </div>
+          <div>
+            <h3>One download. Nothing else to install.</h3>
+            <p>Apache 2.4.71, PHP 8.5.13 and 8.3.37, MariaDB 11.8 LTS and phpMyAdmin 5.2.3 come in a single 110 MB installer, Visual C++ runtime included.</p>
+            <p>Switch PHP versions in Settings, open phpMyAdmin already logged in, and connect from PHP with <code>127.0.0.1</code>, user <code>root</code>, no password. Close the window and everything stops safely.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= QUAD ======================= -->
+  <section>
+    <div class="wrap">
+      <div class="dots"><h2>Small things, done right</h2></div>
+      <div class="quad">
+        <div>
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>No admin needed</h4>
+          <p>After setup NAMP runs as you. No UAC prompt every morning.</p>
+        </div>
+        <div>
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>Watches itself</h4>
+          <p>If Apache or MariaDB crashes, NAMP notices and restarts it.</p>
+        </div>
+        <div>
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Hourly backups</h4>
+          <p>Every database, compressed. Unchanged ones are skipped. Restore in two clicks.</p>
+        </div>
+        <div>
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Logs per site</h4>
+          <p>Errors, visits and PHP warnings for each domain, with live tail and search.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= RAIL ======================= -->
+  <section id="projects">
+    <div class="wrap">
+      <div class="dots">
+        <h2>Bring any PHP project</h2>
+        <p class="sub">Point a site at your folder and open it in the browser.</p>
+      </div>
+    </div>
+    <div class="rail">
+      <div class="note lined"><span class="k">Laravel</span><h4>Laravel apps</h4><p>Point a site at your project's public folder. Rewrites work out of the box.</p></div>
+      <div class="note pink"><span class="k">WordPress</span><h4>WordPress sites</h4><p>MariaDB, mod_rewrite and HTTPS ready for pretty permalinks.</p></div>
+      <div class="note grid"><span class="k">Plain PHP</span><h4>Drop files, refresh</h4><p>Put files in C:\NAMP\www and open localhost.</p></div>
+      <div class="note table"><span class="k">APIs</span><h4>Webhooks and APIs</h4><p>Call https://yoursite.local from PHP with cURL - NAMP's certificate is trusted.</p></div>
+      <div class="note dotted"><span class="k">XAMPP</span><h4>Coming from XAMPP</h4><p>Same ports, same root user. Export your databases and import them in a few clicks.</p></div>
+    </div>
+  </section>
+
+  <!-- ======================= GO LIVE ======================= -->
+  <section>
+    <div class="wrap">
+      <div class="dots"><h2>Ready to go live?</h2></div>
+      <div class="live">
+        <ol>
+          <li><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 .5-5.3 4.6L18.5 21 12 17.3 5.5 21l1.8-6.9L2 9.5 9 9z"/></svg></span><div><b>Hosting from $0.50/mo.</b> Fast servers for PHP, Laravel and WordPress, from the team that makes NAMP.</div></li>
+          <li><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><div><b>Free SSL.</b> Your live site gets HTTPS too, just like on NAMP.</div></li>
+          <li><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span><div><b>Free migration.</b> Send us your files and database, we move them for you.</div></li>
+          <li><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1"/><rect x="17" y="14" width="4" height="6" rx="1"/></svg></span><div><b>24/7 human support</b> and a 30-day money-back guarantee.</div></li>
+        </ol>
+        <div class="cta"><a class="btn primary" href="https://lvato.com/?utm_source=namp&amp;utm_medium=landing&amp;utm_campaign=go_live" target="_blank" rel="noopener">See Lvato hosting</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= FAQ ======================= -->
+  <section id="faq">
+    <div class="wrap">
+      <div class="dots"><h2>Straight answers</h2></div>
+      <div class="faq">
+        <details open>
+          <summary>Is NAMP really free?</summary>
+          <p>Yes. NAMP is made free by Lvato, a web hosting company. Apache, PHP, MariaDB and phpMyAdmin are open source projects bundled as they are.</p>
+        </details>
+        <details>
+          <summary>Can I keep XAMPP installed?</summary>
+          <p>Yes. NAMP installs to <code>C:\NAMP</code> and never touches XAMPP's files. Both use ports 80, 443 and 3306, so stop XAMPP's Apache and MySQL before starting NAMP - or change NAMP's ports in Settings. To move your databases, export them in XAMPP's phpMyAdmin and import them in NAMP.</p>
+        </details>
+        <details>
+          <summary>What happens if the power goes out?</summary>
+          <p>Committed data is already on disk, and the database replays its log when it starts again. If files were damaged, NAMP repairs them step by step: cleaning crash-damaged logs, repairing system tables, a safe-mode export and rebuild, then the last-good copy and hourly SQL backups. Damaged files go to a quarantine folder and are never deleted.</p>
+        </details>
+        <details>
+          <summary>Does it need administrator rights?</summary>
+          <p>Only once, for the installer. It sets up the database service and a small "NAMP Helper" service that updates the hosts file and HTTPS certificates. After that, NAMP runs as a normal user.</p>
+        </details>
+        <details>
+          <summary>Is the HTTPS certificate safe?</summary>
+          <p>NAMP creates its own certificate authority on your PC. It can only issue certificates for local names like <code>.local</code> and <code>.test</code>, and its root key is destroyed right after setup - it can never be used for a real website. Uninstalling NAMP removes it.</p>
+        </details>
+        <details>
+          <summary>How do I connect from PHP?</summary>
+          <p>Host <code>127.0.0.1</code> (or <code>localhost</code>), port <code>3306</code>, user <code>root</code>, empty password - the same as XAMPP, so most projects work without changes.</p>
+        </details>
+        <details>
+          <summary>Which Windows versions?</summary>
+          <p>Windows 11, 64-bit. Windows 10 64-bit should work too.</p>
+        </details>
+        <details>
+          <summary>How do I uninstall?</summary>
+          <p>Windows Settings, Apps, NAMP. The services, certificate and hosts entries are removed. Your websites, databases and backups stay in <code>C:\NAMP</code> until you delete the folder.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= FINAL CTA ======================= -->
+  <section class="final">
+    <div class="wrap">
+      <div class="dots"><h2>Your local server, sorted.</h2><p class="sub">One installer. Free forever.</p></div>
+      <div class="cta">
+        <a class="btn primary" href="downloads/NAMP-Setup-1.0.0.exe">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 2.3 6.5 1.4v6.2H0zM7.3 1.3 16 0v7.6H7.3zM0 8.4h6.5v6.2L0 13.7zm7.3 0H16V16l-8.7-1.2z"/></svg>
+          Download NAMP 1.0.0
+        </a>
+      </div>
+      <p class="hash">SHA-256 F305A88C52B844E2C3F246CE44564EB6E115BA98ED3C845397B9AF7A25D24B1A</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>NAMP - free local server by <a href="https://lvato.com/?utm_source=namp&amp;utm_medium=landing&amp;utm_campaign=footer" target="_blank" rel="noopener">Lvato</a> · © 2026</span>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#faq">FAQ</a>
+      <a href="downloads/NAMP-Setup-1.0.0.exe">Download</a>
+      <a href="https://lvato.com/?utm_source=namp&amp;utm_medium=landing&amp;utm_campaign=footer" target="_blank" rel="noopener">Hosting</a>
+    </nav>
+  </div>
+</footer>
+<script>
+  // GitHub star count for the header pill (skipped until a real repository URL is set)
+  (function () {
+    var a = document.querySelector('[data-github]');
+    var m = a && a.href.match(/github\.com\/([^\/]+\/[^\/?#]+)/);
+    if (!m || /YOUR-ORG/i.test(m[1])) return;
+    fetch('https://api.github.com/repos/' + m[1])
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (j && typeof j.stargazers_count === 'number') {
+          a.querySelector('.stars').textContent = j.stargazers_count.toLocaleString('en-US');
+          a.classList.add('has-stars');
+        }
+      })
+      .catch(function () {});
+  })();
+</script>
+</body>
+</html>

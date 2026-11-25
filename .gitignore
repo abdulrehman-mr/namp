@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------
+# NAMP - files that are generated, downloaded or too big for git.
+# Everything here can be recreated with:  powershell -File build.ps1
+# ---------------------------------------------------------------
+
+# Downloaded server components (Apache, PHP, MariaDB, phpMyAdmin, VC++ runtime)
+build/downloads/
+build/extract/
+build/stage/
+
+# Self-test environment, logs and temp files
+build/testenv/
+build/*.log
+build/cacert.tmp
+
+# Compiled programs
+build/*.exe
+*.pdb
+
+# Installer output - attach NAMP-Setup-x.y.z.exe to a GitHub Release instead
+# (GitHub rejects files over 100 MB)
+dist/
+landing/downloads/*
+!landing/downloads/.gitkeep
+
+# Leftovers from interrupted writes
+*.namp-tmp
+*.part
+
+# Editors and OS
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Local notes and secrets that should never be published
+.env
+*.local.json
+.claude/settings.local.json
